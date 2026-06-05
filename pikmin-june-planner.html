@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>皮克敏 6月任務</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f5f6f2;--w:#fff;--bd:#e0e4db;--bd2:#c8d0c2;
+  --g:#2d8a48;--gl:#e8f5ec;--gm:#9fcfb0;
+  --y:#b07000;--yl:#fff5df;--ym:#e8c860;
+  --r:#c0392b;--rl:#fdecea;
+  --t1:#18201a;--t2:#3c5040;--t3:#7a9080;
+  --g3:#f0f2ee;
+  --s1:#2d8a48;--s2:#b07000;--s3:#c0392b;--s4:#6d3fc0;
+}
+body{background:var(--bg);color:var(--t1);font-family:'Noto Sans TC',sans-serif;font-size:14px;min-height:100vh;}
+
+/* TOP */
+.top{position:sticky;top:0;z-index:60;background:var(--w);border-bottom:1px solid var(--bd);}
+.top-inner{padding:10px 14px 0;}
+.top-h{display:flex;align-items:center;margin-bottom:8px;}
+.top-h h1{font-size:15px;font-weight:700;flex:1;}
+.top-h small{font-size:10px;font-weight:400;color:var(--t3);margin-left:4px;}
+.tabs{display:flex;border-top:1px solid var(--bd);margin:8px -14px 0;}
+.tab{flex:1;padding:8px 4px;text-align:center;font-size:11px;font-weight:700;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;}
+.tab.on{color:var(--g);border-bottom-color:var(--g);}
+
+/* SUMMARY */
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 14px 0;}
+.sc{background:var(--w);border:1px solid var(--bd);border-radius:9px;padding:8px;text-align:center;}
+.sv{font-size:18px;font-weight:700;line-height:1.2;}
+.sl{font-size:9px;color:var(--t3);margin-top:2px;}
+
+/* GANTT */
+.gantt-wrap{margin:10px 14px 0;background:var(--w);border:1px solid var(--bd);border-radius:11px;overflow:hidden;}
+.gantt-hd{padding:8px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;}
+.gantt-hd-t{font-size:12px;font-weight:700;color:var(--t2);}
+.legend{display:flex;gap:7px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:3px;font-size:9px;color:var(--t3);}
+.leg-b{width:8px;height:8px;border-radius:2px;}
+.gantt-scroll{overflow-x:auto;padding:6px 12px 8px;}
+.gantt-scroll::-webkit-scrollbar{height:3px;}
+.gantt-scroll::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px;}
+.gantt-table{width:100%;min-width:560px;border-collapse:collapse;table-layout:fixed;}
+.g-lbl{font-size:9px;color:var(--t2);white-space:nowrap;padding-right:6px;width:74px;vertical-align:middle;}
+.g-sdot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:3px;vertical-align:middle;}
+.g-dh{font-size:8px;color:var(--t3);text-align:center;padding-bottom:2px;min-width:10px;}
+.g-dh.td{color:var(--g);font-weight:700;}
+.g-cell{height:16px;border-right:1px solid #eef0eb;}
+.g-cell.td-col{border-right-color:var(--gm);}
+
+/* COUPON */
+.coupon-wrap{margin:10px 14px 0;background:var(--w);border:1px solid var(--bd);border-radius:11px;overflow:hidden;}
+.coupon-hd{padding:8px 12px;font-size:11px;font-weight:700;color:var(--t2);border-bottom:1px solid var(--bd);background:var(--g3);}
+.c-row{display:flex;align-items:center;padding:7px 12px;border-bottom:1px solid var(--bd);gap:8px;}
+.c-row:last-child{border-bottom:none;}
+.c-row.best{background:var(--gl);}
+.ctag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap;text-align:center;min-width:34px;}
+.tg-best{background:var(--g);color:#fff;}
+.tg-ok{background:#e3f0fb;color:#1565a8;}
+.tg-no{background:var(--g3);color:var(--t3);}
+.cdesc{flex:1;font-size:11px;color:var(--t2);}
+.cres{font-size:11px;font-weight:700;white-space:nowrap;}
+.cres.plus{color:var(--g);}
+.cres.flat{color:var(--t3);}
+
+/* DAILY */
+.sec-lbl{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding:12px 14px 5px;}
+.day-list{padding:0 14px;}
+.cycle-sep{display:flex;align-items:center;gap:7px;margin:10px 0 6px;}
+.cyc-pill{font-size:9px;font-weight:700;padding:2px 9px;border-radius:20px;border:1px solid;white-space:nowrap;}
+.c1p{background:var(--gl);color:var(--g);border-color:var(--gm);}
+.c2p{background:var(--yl);color:var(--y);border-color:var(--ym);}
+.c3p{background:#f0ebfa;color:#6d3fc0;border-color:#c8b0f0;}
+.c4p{background:var(--rl);color:var(--r);border-color:#f0b0a8;}
+.sep-ln{flex:1;height:1px;background:var(--bd);}
+
+/* DAY CARD */
+.dcard{background:var(--w);border:1.5px solid var(--bd);border-radius:11px;margin-bottom:6px;overflow:hidden;}
+.dcard.dtoday{border-color:var(--g);box-shadow:0 0 0 2px var(--gl);}
+.dcard.dpast{opacity:.55;}
+.dcard.dempty{opacity:.45;}
+.dhead{display:flex;align-items:center;gap:8px;padding:9px 11px;cursor:pointer;user-select:none;}
+.ddate{min-width:32px;}
+.dnum{font-size:17px;font-weight:700;line-height:1;}
+.dcard.dtoday .dnum{color:var(--g);}
+.dwd{font-size:9px;color:var(--t3);}
+.dmeta{flex:1;min-width:0;}
+.dsum{font-size:11px;font-weight:700;color:var(--t2);}
+.dsub{font-size:10px;color:var(--t3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dright{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+.dpill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;}
+.dp-reward{background:#fff3cd;color:#856404;border:1px solid #ffc107;}
+.dp-shroom{background:var(--rl);color:var(--r);}
+.dp-today{background:var(--g);color:#fff;font-size:9px;}
+.dchev{font-size:11px;color:var(--t3);transition:transform .15s;flex-shrink:0;}
+.dcard.dopen .dchev{transform:rotate(90deg);}
+.dbody{display:none;}
+.dcard.dopen .dbody{display:block;}
+
+/* SHROOM ADJUSTER */
+.sh-adj{display:flex;align-items:center;gap:8px;padding:7px 11px;background:var(--g3);border-bottom:1px solid var(--bd);}
+.sh-adj-lbl{font-size:11px;color:var(--t2);flex:1;}
+.sh-adj-lbl b{color:var(--g);}
+.mini-ctr{display:flex;align-items:center;background:var(--w);border:1px solid var(--gm);border-radius:7px;overflow:hidden;}
+.mini-btn{background:none;border:none;width:26px;height:26px;font-size:14px;font-weight:700;color:var(--g);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.mini-btn:active{background:var(--gl);}
+.mini-val{font-size:13px;font-weight:700;min-width:22px;text-align:center;}
+
+/* ONE-CLICK */
+.ca-btn{display:flex;align-items:center;justify-content:center;gap:5px;margin:7px 11px 4px;padding:7px;background:var(--gl);border:1.5px solid var(--gm);border-radius:8px;font-size:11px;font-weight:700;color:var(--g);cursor:pointer;width:calc(100% - 22px);}
+.ca-btn:active{background:var(--gm);}
+.ca-btn.done{background:var(--g3);border-color:var(--bd);color:var(--t3);}
+
+/* ROW GROUP */
+.rg{border-top:1px solid var(--bd);margin-top:2px;}
+.rg:first-of-type{border-top:none;margin-top:0;}
+.rg-hd{display:flex;align-items:center;gap:5px;padding:5px 11px 3px;}
+.rg-stage{font-size:9px;font-weight:700;padding:1px 7px;border-radius:5px;}
+.rg-s1{background:rgba(45,138,72,.12);color:var(--s1);}
+.rg-s2{background:rgba(176,112,0,.12);color:var(--s2);}
+.rg-s3{background:rgba(192,57,43,.12);color:var(--s3);}
+.rg-s4{background:rgba(109,63,192,.12);color:var(--s4);}
+.rg-r{font-size:9px;color:var(--t3);font-weight:600;}
+.rg-badge{margin-left:auto;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;}
+.rgb-now{background:#fff3cd;color:#856404;}
+.rgb-done{background:var(--gl);color:var(--g);}
+.rgb-wip{background:var(--yl);color:var(--y);}
+
+/* TASK ITEM */
+.ti{display:flex;align-items:flex-start;gap:7px;padding:4px 11px;border-bottom:1px solid var(--g3);}
+.ti:last-child{border-bottom:none;}
+.ck{width:17px;height:17px;border:1.5px solid var(--bd2);border-radius:4px;background:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent;transition:all .12s;margin-top:1px;}
+.ck.on{background:var(--g);border-color:var(--g);color:#fff;}
+.ck:disabled{opacity:.35;cursor:default;}
+.ti-icon{font-size:12px;flex-shrink:0;margin-top:1px;}
+.ti-body{flex:1;min-width:0;}
+.ti-text{font-size:11px;color:var(--t2);display:block;}
+.ti-text.done{text-decoration:line-through;color:var(--t3);}
+.ti-sub{display:flex;align-items:center;gap:4px;margin-top:2px;flex-wrap:wrap;}
+.sh-b{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;}
+.sh-bd{background:var(--gl);color:var(--g);}
+.sh-bw{background:var(--yl);color:var(--y);}
+.sh-dots{font-size:11px;letter-spacing:1px;font-family:monospace;}
+.sh-ct{font-size:9px;color:var(--t3);}
+
+/* TASK TABLE */
+.tt-wrap{margin:0 14px 20px;}
+.tt-s{background:var(--w);border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:8px;}
+.tt-sh{display:flex;align-items:center;gap:7px;padding:8px 12px;cursor:pointer;user-select:none;}
+.tt-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.tt-sn{font-size:12px;font-weight:700;}
+.tt-sc{font-size:10px;color:var(--t3);flex:1;}
+.tt-cv{font-size:11px;color:var(--t3);transition:transform .15s;}
+.tt-s.open .tt-cv{transform:rotate(90deg);}
+.tt-b{display:none;border-top:1px solid var(--bd);}
+.tt-s.open .tt-b{display:block;}
+.tt-rg{padding:4px 0;border-bottom:1px solid var(--g3);}
+.tt-rg:last-child{border-bottom:none;}
+.tt-rh{display:flex;align-items:center;gap:6px;padding:3px 12px;background:var(--g3);}
+.tt-rn{font-size:9px;color:var(--t3);font-weight:700;min-width:18px;}
+.tt-rnote{font-size:9px;color:var(--t3);}
+.tt-ri{padding:2px 12px;}
+.tt-item{font-size:11px;color:var(--t1);padding:2px 0;}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-inner">
+    <div class="top-h"><h1>🍄 皮克敏 6月任務 <small>目標：最多獎勵</small></h1></div>
+    <div class="tabs">
+      <div class="tab on" onclick="setTab('dashboard')" id="tab-dashboard">📊 總覽</div>
+      <div class="tab" onclick="setTab('daily')" id="tab-daily">📅 每日</div>
+      <div class="tab" onclick="setTab('tasklist')" id="tab-tasklist">📋 任務表</div>
+    </div>
+  </div>
+</div>
+
+<div id="view-dashboard">
+  <div class="sum">
+    <div class="sc"><div class="sv" id="sv-r" style="color:#856404">—</div><div class="sl">🏆 預計獎勵</div></div>
+    <div class="sc"><div class="sv" id="sv-cycles" style="color:var(--g)">—</div><div class="sl">完整循環數</div></div>
+    <div class="sc"><div class="sv" id="sv-today" style="color:var(--t2)">—</div><div class="sl">🎟 菇券使用</div></div>
+  </div>
+  <div class="gantt-wrap">
+    <div class="gantt-hd">
+      <span class="gantt-hd-t">📊 蘑菇甘特圖</span>
+      <div class="legend">
+        <div class="leg"><div class="leg-b" style="background:var(--gm)"></div>已完成</div>
+        <div class="leg"><div class="leg-b" style="background:var(--g)"></div>今日</div>
+        <div class="leg"><div class="leg-b" style="background:var(--bd2)"></div>預計</div>
+        <div class="leg"><div class="leg-b" style="background:#e8c860"></div>循環二+</div>
+      </div>
+    </div>
+    <div class="gantt-scroll"><div id="gantt-inner"></div></div>
+  </div>
+  <div class="coupon-wrap">
+    <div class="coupon-hd">🎟 菇券效益分析（用 N 張菇券 → 循環提前 → 整月多拿幾個獎勵）</div>
+    <div id="coupon-body"></div>
+  </div>
+  <div style="height:20px"></div>
+</div>
+
+<div id="view-daily" style="display:none">
+  <div class="sec-lbl">每日任務明細</div>
+  <div class="day-list" id="day-list"></div>
+  <div style="height:30px"></div>
+</div>
+
+<div id="view-tasklist" style="display:none">
+  <div class="sec-lbl">原始任務表</div>
+  <div class="tt-wrap" id="tt-inner"></div>
+</div>
+
+<script>
+// ═══════════════════════
+// CONSTANTS
+// ═══════════════════════
+const TODAY = 5;
+const WD = ['日','一','二','三','四','五','六'];
+const wd = d => WD[new Date(2026,5,d).getDay()];
+const ICONS = {steps:'👟',pikmin:'🌱',explore:'🗺',flower:'🌸',shroom:'🍄'};
+const SDOT = {1:'#2d8a48',2:'#b07000',3:'#c0392b',4:'#6d3fc0'};
+const RGC  = {1:'rg-s1',2:'rg-s2',3:'rg-s3',4:'rg-s4'};
+const SC   = {1:'var(--s1)',2:'var(--s2)',3:'var(--s3)',4:'var(--s4)'};
+
+const ALL_TASKS = [
+  {id:'1.1.1',s:1,r:1,type:'steps',  text:'走 1,000 步',              thresh:0},
+  {id:'1.2.1',s:1,r:2,type:'pikmin', text:'培育 2 隻皮克敏',          thresh:0},
+  {id:'1.3.1',s:1,r:3,type:'explore',text:'完成 2 個探險',            thresh:0},
+  {id:'1.4.1',s:1,r:4,type:'flower', text:'種 1,000 朵花',            thresh:0},
+  {id:'1.4.2',s:1,r:4,type:'shroom', text:'摧毀 2 棵蘑菇',  sh:2,    thresh:0},
+  {id:'2.1.1',s:2,r:1,type:'steps',  text:'走 2,000 步',              thresh:2},
+  {id:'2.2.1',s:2,r:2,type:'flower', text:'種 1,000 朵花',            thresh:2},
+  {id:'2.2.2',s:2,r:2,type:'shroom', text:'摧毀 2 棵蘑菇',  sh:2,    thresh:2},
+  {id:'2.3.1',s:2,r:3,type:'pikmin', text:'培育 3 隻皮克敏',          thresh:4},
+  {id:'2.3.2',s:2,r:3,type:'shroom', text:'摧毀 3 棵蘑菇',  sh:3,    thresh:4},
+  {id:'2.4.1',s:2,r:4,type:'flower', text:'種 500 朵風鈴草',          thresh:7},
+  {id:'2.4.2',s:2,r:4,type:'shroom', text:'摧毀 4 棵蘑菇',  sh:4,    thresh:7},
+  {id:'3.1.1',s:3,r:1,type:'steps',  text:'走 2,000 步',              thresh:11},
+  {id:'3.1.2',s:3,r:1,type:'explore',text:'完成 2 個探險',            thresh:11},
+  {id:'3.2.1',s:3,r:2,type:'flower', text:'種 1,500 朵白色鳶尾花',    thresh:11},
+  {id:'3.2.2',s:3,r:2,type:'shroom', text:'摧毀 3 棵蘑菇',  sh:3,    thresh:11},
+  {id:'3.3.1',s:3,r:3,type:'flower', text:'種 1,500 朵紅色鳶尾花',    thresh:14},
+  {id:'3.3.2',s:3,r:3,type:'shroom', text:'摧毀 4 棵蘑菇',  sh:4,    thresh:14},
+  {id:'3.4.1',s:3,r:4,type:'flower', text:'種 1,500 朵黃色鳶尾花',    thresh:18},
+  {id:'3.4.2',s:3,r:4,type:'flower', text:'種 2,000 朵紅色風鈴草',    thresh:18},
+  {id:'3.4.3',s:3,r:4,type:'shroom', text:'摧毀 5 棵蘑菇',  sh:5,    thresh:18},
+  {id:'4.1.1',s:4,r:1,type:'explore',text:'完成 3 個探險',            thresh:23},
+  {id:'4.1.2',s:4,r:1,type:'shroom', text:'摧毀 3 棵蘑菇',  sh:3,    thresh:23},
+  {id:'4.2.1',s:4,r:2,type:'flower', text:'種 2,000 朵白色風鈴草',    thresh:26},
+  {id:'4.2.2',s:4,r:2,type:'shroom', text:'摧毀 4 棵蘑菇',  sh:4,    thresh:26},
+  {id:'4.3.1',s:4,r:3,type:'flower', text:'種 2,000 朵紅色風鈴草',    thresh:30},
+  {id:'4.3.2',s:4,r:3,type:'flower', text:'種 1,000 朵藍色鳶尾花',    thresh:30},
+  {id:'4.3.3',s:4,r:3,type:'shroom', text:'摧毀 4 棵蘑菇',  sh:4,    thresh:30},
+  {id:'4.4.1',s:4,r:4,type:'flower', text:'種 2,000 朵藍色風鈴草',    thresh:34},
+  {id:'4.4.2',s:4,r:4,type:'flower', text:'種 2,500 朵鳶尾花',        thresh:34},
+  {id:'4.4.3',s:4,r:4,type:'shroom', text:'摧毀 5 棵蘑菇',  sh:5,    thresh:34},
+];
+const SH_TASKS = ALL_TASKS.filter(t => t.type === 'shroom');
+const TOTAL_SH = SH_TASKS.reduce((s,t) => s + t.sh, 0); // 39
+
+// ═══════════════════════
+// STATE
+// ═══════════════════════
+let dailyN = JSON.parse(localStorage.getItem('pikmin-dailyN') || '{}');
+let DONE   = JSON.parse(localStorage.getItem('pikmin-done')   || '{}');
+const save = () => {
+  localStorage.setItem('pikmin-done',    JSON.stringify(DONE));
+  localStorage.setItem('pikmin-dailyN',  JSON.stringify(dailyN));
+};
+let currentTab = 'dashboard';
+const openCards = new Set();
+
+const getNForDay = (day) => dailyN[day] !== undefined ? dailyN[day] : 3;
+
+// ═══════════════════════
+// BUILD SCHEDULE FOR ONE CYCLE
+// Returns array of day objects
+// ═══════════════════════
+function buildSchedule(startDay, suppressFirstDayNS = false) {
+  let q = SH_TASKS.map((t, i) => ({ ...t, rem: t.sh, qi: i }));
+  let cum = 0;
+  const result = [];
+  let isFirstDay = true;
+
+  for (let day = startDay; day <= 30; day++) {
+    const n = getNForDay(day);
+    const prevCum = cum;
+    let budget = n;
+    const shHits = [];
+
+    while (q.length > 0 && budget > 0) {
+      const item = q[0];
+      const taskStart = SH_TASKS.slice(0, item.qi).reduce((s, x) => s + x.sh, 0);
+      const before = Math.max(0, Math.min(item.sh, cum - taskStart));
+      const take = Math.min(item.rem, budget);
+      budget -= take;
+      cum += take;
+      shHits.push({
+        id: item.id, s: item.s, r: item.r, total: item.sh,
+        before, today: take, after: before + take,
+        complete: item.rem - take === 0,
+      });
+      item.rem -= take;
+      if (item.rem === 0) q.shift();
+    }
+
+    // thresh=0 tasks: show on first day UNLESS suppressFirstDayNS
+    // (they'll be shown on the last day of the previous cycle instead)
+    const nsNew = ALL_TASKS.filter(t =>
+      t.type !== 'shroom' &&
+      ((t.thresh === 0 && isFirstDay && !suppressFirstDayNS) ||
+       (t.thresh > prevCum && t.thresh <= cum))
+    );
+
+    result.push({ day, n, cum, prevCum, shHits, nsNew });
+    isFirstDay = false;
+
+    if (q.length === 0) break;
+  }
+  return result;
+}
+
+// thresh=0 non-shroom tasks = first-day tasks of any cycle
+const FIRST_DAY_NS = ALL_TASKS.filter(t => t.type !== 'shroom' && t.thresh === 0);
+
+// ═══════════════════════
+// SIMULATE: run cycles until June ends
+// ═══════════════════════
+// simulate(extraDay, extraN) — run with dailyN as-is, but optionally add extraN to extraDay
+// extraDay/extraN used for coupon what-if analysis only
+function simulate(extraDay, extraN) {
+  // Temporarily add extra shrooms to one day
+  const saved = (extraDay !== undefined) ? dailyN[extraDay] : undefined;
+  if (extraDay !== undefined) {
+    dailyN[extraDay] = getNForDay(extraDay) + (extraN || 0);
+  }
+
+  const cycles = [];
+  let startDay = 1;
+  let isFirstCycle = true;
+
+  while (startDay <= 30) {
+    const sched = buildSchedule(startDay, !isFirstCycle);
+    if (sched.length === 0) break;
+    const lastShDay = sched.reduce((m, d) => d.shHits.length > 0 ? d.day : m, startDay);
+
+    if (lastShDay < 30) {
+      const lastDay = sched.find(d => d.day === lastShDay);
+      if (lastDay) {
+        lastDay.nsNew = [
+          ...lastDay.nsNew,
+          ...FIRST_DAY_NS.map(t => ({ ...t, nextCycle: true })),
+        ];
+      }
+    }
+
+    cycles.push({ sched, startDay, lastShDay });
+    startDay = lastShDay + 1;
+    isFirstCycle = false;
+  }
+
+  if (extraDay !== undefined) {
+    if (saved === undefined) delete dailyN[extraDay]; else dailyN[extraDay] = saved;
+  }
+
+  // Count rewards per cycle by stepping through days:
+  // - shroom task: rewarded when SH_COMPLETE_AT[id] crosses into (prevCum, cum]
+  // - ns task: rewarded when thresh crosses into (prevCum, cum], or thresh==0 on first day
+  const SH_COMPLETE_AT = {};
+  let _cumSh = 0;
+  SH_TASKS.forEach(t => { _cumSh += t.sh; SH_COMPLETE_AT[t.id] = _cumSh; });
+
+  const countR = (sched) => {
+    let total = 0, firstDay = true;
+    for (const d of sched) {
+      const prev = d.prevCum, cur = d.cum;
+      for (const t of ALL_TASKS) {
+        if (t.type === 'shroom') {
+          const doneAt = SH_COMPLETE_AT[t.id] || 999;
+          if (doneAt > prev && doneAt <= cur) total++;
+        } else {
+          if (t.thresh === 0 && firstDay) total++;
+          else if (t.thresh > prev && t.thresh <= cur) total++;
+        }
+      }
+      firstDay = false;
+    }
+    return total;
+  };
+
+  return {
+    cycles,
+    totalRewards: cycles.reduce((s, c) => s + countR(c.sched), 0),
+    cycleRewards: cycles.map(c => countR(c.sched)),
+  };
+}
+
+// How many coupons already used this month (any day > 3 shrooms)
+function couponsUsed() {
+  return Object.entries(dailyN)
+    .filter(([d]) => d >= 1 && d <= 30)
+    .reduce((s, [, v]) => s + Math.max(0, v - 3), 0);
+}
+
+// ═══════════════════════
+// GANTT
+// ═══════════════════════
+function renderGantt() {
+  const { cycles } = simulate();
+  const N = 30;
+  const C_COLORS = ['var(--gm)', '#e8c860', '#c8b0f0', '#f0c080'];
+  const C_COLORS_TODAY = 'var(--g)';
+  const C_FUTURE = 'var(--bd2)';
+
+  const allCells = {};
+  cycles.forEach(({ sched }, ci) => {
+    sched.forEach(d => {
+      d.shHits.forEach(h => {
+        const qi = SH_TASKS.findIndex(t => t.id === h.id);
+        if (!allCells[qi]) allCells[qi] = {};
+        allCells[qi][d.day] = { count: h.today, ci };
+      });
+    });
+  });
+
+  let html = `<table class="gantt-table"><thead><tr><th style="width:74px"></th>`;
+  for (let d = 1; d <= N; d++) html += `<th class="g-dh${d === TODAY ? ' td' : ''}">${d}</th>`;
+  html += `</tr></thead><tbody>`;
+
+  SH_TASKS.forEach((t, qi) => {
+    html += `<tr><td class="g-lbl"><span class="g-sdot" style="background:${SDOT[t.s]}"></span>${t.id.slice(0, -2)}</td>`;
+    for (let d = 1; d <= N; d++) {
+      const cell = (allCells[qi] || {})[d];
+      const prev = (allCells[qi] || {})[d - 1];
+      const next = (allCells[qi] || {})[d + 1];
+      const has = !!cell, hadP = !!prev, hasN = !!next;
+      const br = has ? (!hadP && !hasN ? '3px' : !hadP ? '3px 0 0 3px' : !hasN ? '0 3px 3px 0' : '0') : '0';
+      let sty = '';
+      if (cell) {
+        const { count, ci } = cell;
+        let col;
+        if (ci === 0) col = d < TODAY ? 'var(--gm)' : d === TODAY ? C_COLORS_TODAY : C_FUTURE;
+        else col = C_COLORS[ci] || '#e0d8f0';
+        const op = ci > 0 ? 'opacity:.8;' : '';
+        const pct = Math.round(count / t.sh * 100);
+        sty = count < t.sh && t.sh > 1
+          ? `background:linear-gradient(to right,${col} ${pct}%,var(--bd) ${pct}%);border-radius:${br};${op}`
+          : `background:${col};border-radius:${br};${op}`;
+      }
+      html += `<td class="g-cell${d === TODAY ? ' td-col' : ''}" style="${sty}"></td>`;
+    }
+    html += `</tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById('gantt-inner').innerHTML = html;
+}
+
+// ═══════════════════════
+// SUMMARY
+// ═══════════════════════
+function renderSummary() {
+  const { cycles, totalRewards, cycleRewards } = simulate();
+  const fullCycles = cycleRewards.filter(r => r === 31).length;
+  const used = couponsUsed();
+  document.getElementById('sv-r').textContent = `${totalRewards}個`;
+  document.getElementById('sv-cycles').textContent = `${fullCycles}/${cycles.length}完整`;
+  document.getElementById('sv-today').textContent = used > 0 ? `已用${used}張` : '未用券';
+}
+
+// ═══════════════════════
+// COUPON
+// ═══════════════════════
+function renderCoupon() {
+  // Logic: using N coupons total =打 N 顆多蘑菇（加在第一天算，整體往前挪）
+  // Simulate by adding N extra to the first available day of each cycle
+  function simWithExtra(totalExtra) {
+    // Run base schedule to find cycle structure, then add extra to LAST cycle
+    // (complete cycles already have 39 shrooms; only the tail cycle benefits)
+    const SH_COMPLETE_AT_LOCAL = {};
+    let _c = 0;
+    SH_TASKS.forEach(t => { _c += t.sh; SH_COMPLETE_AT_LOCAL[t.id] = _c; });
+
+    const runCycles = (extraDay, extraN) => {
+      const cycles = []; let startDay = 1; let firstCycle = true;
+      while (startDay <= 30) {
+        let q = SH_TASKS.map(t => ({...t, rem: t.sh}));
+        let cum = 0, lastSh = startDay, rewards = 0, firstDay = true;
+        for (let day = startDay; day <= 30; day++) {
+          const n = getNForDay(day) + (day === extraDay ? extraN : 0);
+          const prev = cum; let budget = n;
+          while (q.length && budget > 0) {
+            const take = Math.min(q[0].rem, budget);
+            budget -= take; cum += take; q[0].rem -= take;
+            if (q[0].rem === 0) q.shift();
+          }
+          for (const t of ALL_TASKS) {
+            if (t.type === 'shroom') {
+              const doneAt = SH_COMPLETE_AT_LOCAL[t.id] || 999;
+              if (doneAt > prev && doneAt <= cum) rewards++;
+            } else {
+              if (t.thresh === 0 && firstDay) rewards++;
+              else if (t.thresh > prev && t.thresh <= cum) rewards++;
+            }
+          }
+          if (cum > prev) lastSh = day;
+          firstDay = false;
+          if (q.length === 0) { lastSh = day; break; }
+        }
+        cycles.push({ startDay, lastSh, cum, r: rewards });
+        startDay = lastSh + 1;
+        firstCycle = false;
+      }
+      return cycles;
+    };
+
+    // Find last cycle start day using base
+    const baseCycles = runCycles(-1, 0);
+    const lastCycleStart = baseCycles[baseCycles.length - 1]?.startDay || 1;
+
+    // Add totalExtra to the first day of the last cycle
+    const finalCycles = runCycles(lastCycleStart, totalExtra);
+    return { cycles: finalCycles, totalRewards: finalCycles.reduce((s, c) => s + c.r, 0) };
+  }
+
+  const base = simWithExtra(0);
+  const baseTotal = base.totalRewards;
+  const used = couponsUsed();
+
+  let html = '';
+
+  // "目前" row = current state (with `used` coupons already applied via dailyN)
+  html += `<div class="c-row">
+    <span class="ctag tg-no">目前</span>
+    <span class="cdesc">${used > 0 ? `已用 ${used} 張菇券` : '不加菇券'}</span>
+    <span class="cres flat">整月預計 ${baseTotal} 個獎勵</span>
+  </div>`;
+
+  // Only show rows where the gain changes (deduplicate same-gain rows)
+  // Show "無效" only once, then each new gain level
+  let prevGain = -999;
+  let prevTotal = baseTotal;
+  for (let extra = 1; extra <= 15; extra++) {
+    const sim = simWithExtra(extra);
+    const total = sim.totalRewards;
+    const gain = total - baseTotal;
+    // Skip if gain hasn't changed since last shown row
+    if (gain === prevGain) continue;
+    prevGain = gain;
+
+    let cls = 'c-row', tag = 'tg-no', res = '', rc = 'flat';
+    if (gain > 0) {
+      cls = 'c-row best'; tag = 'tg-best'; rc = 'plus';
+      res = `整月多 ${gain} 個獎勵`;
+    } else {
+      res = `整月無差（仍 ${total} 個）`;
+    }
+    html += `<div class="${cls}">
+      <span class="ctag ${tag}">${gain > 0 ? '推薦' : '無效'}</span>
+      <span class="cdesc">再用 ${extra} 張菇券</span>
+      <span class="cres ${rc}">${res}</span>
+    </div>`;
+  }
+  document.getElementById('coupon-body').innerHTML = html;
+}
+
+// ═══════════════════════
+// DAILY LIST
+// ═══════════════════════
+function renderDailyList() {
+  // Persist open cards
+  document.querySelectorAll('.dcard.dopen').forEach(el => openCards.add(el.id.slice(3)));
+  openCards.add(`1_${TODAY}`); // always open today
+
+  const { cycles } = simulate();
+
+  // Flatten all days across all cycles
+  const allDays = [];
+  cycles.forEach(({ sched, startDay, lastShDay }, ci) => {
+    sched.forEach(d => allDays.push({ ...d, cycle: ci + 1, startDay, lastShDay }));
+  });
+
+  const CPILL = ['c1p', 'c2p', 'c3p', 'c4p'];
+  const CLABELS = cycles.map(({ startDay, lastShDay }, i) =>
+    `第${i + 1}循環 6/${startDay}–6/${Math.min(lastShDay, 30)}`
+  );
+
+  let html = '', lastCycle = null;
+
+  for (const d of allDays) {
+    const { cycle, day, shHits, nsNew, cum, prevCum } = d;
+    const ci = cycle - 1;
+
+    // Cycle separator
+    if (cycle !== lastCycle) {
+      const pillCls = CPILL[ci] || 'c2p';
+      const lbl = CLABELS[ci] || `第${cycle}循環`;
+      html += `<div class="cycle-sep"><span class="cyc-pill ${pillCls}">${lbl}</span><div class="sep-ln"></div></div>`;
+      lastCycle = cycle;
+    }
+
+    const isToday = (cycle === 1 && day === TODAY);
+    const isPast  = (cycle === 1 && day < TODAY);
+    const isEmpty = (shHits.length === 0 && nsNew.length === 0);
+    const key     = `${cycle}_${day}`;
+    const isOpen  = openCards.has(key);
+
+    const cardCls = ['dcard',
+      isToday ? 'dtoday' : isPast ? 'dpast' : '',
+      isEmpty ? 'dempty' : '',
+      isOpen  ? 'dopen'  : '',
+    ].filter(Boolean).join(' ');
+
+    // Empty (buffer) day
+    if (isEmpty) {
+      html += `<div class="${cardCls}" id="dc_${key}">
+        <div class="dhead" onclick="tgl('${key}')">
+          <div class="ddate"><div class="dnum">${day}</div><div class="dwd">週${wd(day)}</div></div>
+          <div class="dmeta">
+            <div class="dsum" style="color:var(--t3)">${isToday ? '<span class="dpill dp-today" style="margin-right:4px">TODAY</span>' : ''}緩衝日</div>
+            <div class="dsub">循環完成！下一循環即將開始 🎉</div>
+          </div>
+          <span class="dchev">›</span>
+        </div>
+        <div class="dbody"><div style="padding:12px;font-size:12px;color:var(--t3);text-align:center;">本循環任務全部完成，明天開始新循環 🍄</div></div>
+      </div>`;
+      continue;
+    }
+
+    const totalSh    = shHits.reduce((s, h) => s + h.today, 0);
+    const rewardCount = [...nsNew, ...shHits.filter(h => h.complete)].length;
+    const shSub       = shHits.map(h => `${h.complete ? '✅' : '⏳'}${h.id.slice(0,-2)}(${h.after}/${h.total})`).join(' ') || '非蘑菇任務';
+
+    // Group tasks by (stage, row)
+    const rowMap = {};
+    const todayTasks = [
+      ...shHits.map(h => ({ ...ALL_TASKS.find(t => t.id === h.id), _hit: h })),
+      ...nsNew,
+    ];
+    todayTasks.forEach(t => {
+      const k = `${t.s}_${t.r}`;
+      if (!rowMap[k]) rowMap[k] = { s: t.s, r: t.r, tasks: [] };
+      rowMap[k].tasks.push(t);
+    });
+    const sortedGroups = Object.values(rowMap).sort((a, b) => {
+      // nextCycle tasks always go last
+      const aNext = a.tasks.some(t => t.nextCycle) ? 1 : 0;
+      const bNext = b.tasks.some(t => t.nextCycle) ? 1 : 0;
+      if (aNext !== bNext) return aNext - bNext;
+      return a.s - b.s || a.r - b.r;
+    });
+
+    // All task IDs (for one-click) — nextCycle tasks use cycle+1
+    const allKeys = sortedGroups.flatMap(g => {
+      const tc = g.tasks.some(t => t.nextCycle) ? cycle + 1 : cycle;
+      return g.tasks.map(t =>
+        t.type === 'shroom' ? `c${tc}_${t.id}_d${day}` : `c${tc}_${t.id}`
+      );
+    });
+    const allDoneFlag = allKeys.length > 0 && allKeys.every(k => DONE[k]);
+
+    // Shroom adjuster
+    const curN = getNForDay(day);
+    let body = `<div class="sh-adj">
+      <div class="sh-adj-lbl">打幾顆蘑菇：<b>${curN}</b> 顆</div>
+      <div class="mini-ctr">
+        <button class="mini-btn" onclick="adjDay(${day},-1,event)">−</button>
+        <div class="mini-val">${curN}</div>
+        <button class="mini-btn" onclick="adjDay(${day},+1,event)">+</button>
+      </div>
+    </div>`;
+
+    // One-click button
+    body += `<button class="ca-btn${allDoneFlag ? ' done' : ''}" onclick="completeAll('${key}',event)">${allDoneFlag ? '✓ 今日任務全部完成' : '⚡ 一鍵完成今日所有任務'}</button>`;
+
+    // Row groups
+    for (const grp of sortedGroups) {
+      const isNextCycle = grp.tasks.some(t => t.nextCycle);
+      const taskCycle = isNextCycle ? cycle + 1 : cycle;
+      const grpKeys = grp.tasks.map(t =>
+        t.type === 'shroom' ? `c${taskCycle}_${t.id}_d${day}` : `c${taskCycle}_${t.id}`
+      );
+      const grpAllDone = grpKeys.every(k => DONE[k]);
+      const grpCanReward = grp.tasks.every(t =>
+        t.type === 'shroom' ? t._hit && t._hit.complete : true
+      );
+
+      const badge = grpAllDone
+        ? `<span class="rg-badge rgb-done">✓ 完成</span>`
+        : grpCanReward
+          ? `<span class="rg-badge rgb-now">🏆 可領獎</span>`
+          : `<span class="rg-badge rgb-wip">進行中</span>`;
+
+      const nextTag = isNextCycle
+        ? `<span style="font-size:9px;font-weight:700;color:var(--y);background:var(--yl);padding:1px 6px;border-radius:4px;margin-left:2px;">🔄 下一循環</span>`
+        : '';
+
+      body += `<div class="rg">
+        <div class="rg-hd">
+          <span class="rg-stage ${RGC[grp.s]}">第${grp.s}階段</span>
+          <span class="rg-r">Row ${grp.r}</span>
+          ${nextTag}
+          ${badge}
+        </div>`;
+
+      for (const t of grp.tasks) {
+        const isS = t.type === 'shroom';
+        const tid = isS ? `c${taskCycle}_${t.id}_d${day}` : `c${taskCycle}_${t.id}`;
+        const on  = DONE[tid];
+        const h   = t._hit;
+
+        body += `<div class="ti">
+          <button class="ck${on ? ' on' : ''}"${isS && !h ? ' disabled' : ''} onclick="ckOnly('${tid}',this)">${on ? '✓' : ''}</button>
+          <span class="ti-icon">${ICONS[t.type]}</span>
+          <div class="ti-body">
+            <span class="ti-text${on ? ' done' : ''}">${t.text}</span>`;
+        if (isS && h) {
+          const dots  = '●'.repeat(h.after) + '○'.repeat(h.total - h.after);
+          const badge = h.complete
+            ? `<span class="sh-b sh-bd">✓完成</span>`
+            : `<span class="sh-b sh-bw">⏳進行中</span>`;
+          body += `<div class="ti-sub">${badge}<span class="sh-dots">${dots}</span><span class="sh-ct">第${h.before+1}${h.before+1!==h.after?'~'+h.after:''}顆／共${h.total}顆</span></div>`;
+        }
+        body += `</div></div>`;
+      }
+      body += `</div>`;
+    }
+
+    html += `<div class="${cardCls}" id="dc_${key}">
+      <div class="dhead" onclick="tgl('${key}')">
+        <div class="ddate"><div class="dnum">${day}</div><div class="dwd">週${wd(day)}</div></div>
+        <div class="dmeta">
+          <div class="dsum">${isToday ? '<span class="dpill dp-today" style="margin-right:4px">TODAY</span>' : ''}🍄×${totalSh}${rewardCount ? ` 🏆×${rewardCount}` : ''}</div>
+          <div class="dsub">${shSub}</div>
+        </div>
+        <div class="dright">
+          ${rewardCount ? `<span class="dpill dp-reward">+${rewardCount}</span>` : ''}
+          ${totalSh     ? `<span class="dpill dp-shroom">🍄×${totalSh}</span>`   : ''}
+        </div>
+        <span class="dchev">›</span>
+      </div>
+      <div class="dbody">${body}</div>
+    </div>`;
+  }
+
+  document.getElementById('day-list').innerHTML = html;
+}
+
+// ═══════════════════════
+// TASK TABLE
+// ═══════════════════════
+function renderTaskTable() {
+  const byS = {1:[],2:[],3:[],4:[]};
+  ALL_TASKS.forEach(t => byS[t.s].push(t));
+  let html = '';
+  for (let s = 1; s <= 4; s++) {
+    const tasks = byS[s];
+    const byR = {};
+    tasks.forEach(t => { if (!byR[t.r]) byR[t.r] = { r:t.r, tasks:[] }; byR[t.r].tasks.push(t); });
+    const rows = Object.values(byR).sort((a,b) => a.r - b.r);
+    html += `<div class="tt-s" id="tts${s}">
+      <div class="tt-sh" onclick="this.parentElement.classList.toggle('open')">
+        <div class="tt-dot" style="background:${SDOT[s]}"></div>
+        <span class="tt-sn" style="color:${SC[s]}">第${s}階段</span>
+        <span class="tt-sc">${tasks.length}個任務</span>
+        <span class="tt-cv">›</span>
+      </div>
+      <div class="tt-b">`;
+    rows.forEach(rg => {
+      html += `<div class="tt-rg">
+        <div class="tt-rh"><span class="tt-rn">Row ${rg.r}</span><span class="tt-rnote">同時進行・各完成各領獎</span></div>
+        <div class="tt-ri">`;
+      rg.tasks.forEach(t => { html += `<div class="tt-item">${ICONS[t.type]} ${t.text}</div>`; });
+      html += `</div></div>`;
+    });
+    html += `</div></div>`;
+  }
+  document.getElementById('tt-inner').innerHTML = html;
+  document.querySelectorAll('.tt-s').forEach(el => el.classList.add('open'));
+}
+
+// ═══════════════════════
+// INTERACTIONS
+// ═══════════════════════
+function tgl(key) {
+  const el = document.getElementById('dc_' + key);
+  if (!el) return;
+  el.classList.toggle('dopen');
+  el.classList.contains('dopen') ? openCards.add(key) : openCards.delete(key);
+}
+
+function ckOnly(id, btn) {
+  DONE[id] = !DONE[id];
+  save();
+  btn.classList.toggle('on', DONE[id]);
+  btn.textContent = DONE[id] ? '✓' : '';
+  btn.closest('.ti')?.querySelector('.ti-text')?.classList.toggle('done', DONE[id]);
+  // Update one-click button state
+  const card = btn.closest('.dcard');
+  if (card) {
+    const btns = [...card.querySelectorAll('.ti .ck:not(:disabled)')];
+    const allOn = btns.every(b => b.classList.contains('on'));
+    const cab = card.querySelector('.ca-btn');
+    if (cab) { cab.classList.toggle('done', allOn); cab.textContent = allOn ? '✓ 今日任務全部完成' : '⚡ 一鍵完成今日所有任務'; }
+  }
+  renderSummary();
+}
+
+function completeAll(key, e) {
+  e && e.stopPropagation();
+  const card = document.getElementById('dc_' + key);
+  if (!card) return;
+  const btns = [...card.querySelectorAll('.ti .ck:not(:disabled)')];
+  const allOn = btns.every(b => b.classList.contains('on'));
+  btns.forEach(b => {
+    const m = b.getAttribute('onclick').match(/'([^']+)'/);
+    if (m) {
+      DONE[m[1]] = !allOn;
+      b.classList.toggle('on', !allOn);
+      b.textContent = !allOn ? '✓' : '';
+      b.closest('.ti')?.querySelector('.ti-text')?.classList.toggle('done', !allOn);
+    }
+  });
+  save();
+  const cab = card.querySelector('.ca-btn');
+  if (cab) { cab.classList.toggle('done', !allOn); cab.textContent = !allOn ? '✓ 今日任務全部完成' : '⚡ 一鍵完成今日所有任務'; }
+  renderSummary();
+}
+
+function adjDay(day, delta, e) {
+  e && e.stopPropagation();
+  dailyN[day] = Math.max(1, getNForDay(day) + delta);
+  save();
+  renderAll();
+}
+
+function setTab(t) {
+  currentTab = t;
+  ['dashboard','daily','tasklist'].forEach(id => {
+    document.getElementById('view-' + id).style.display = id === t ? 'block' : 'none';
+    document.getElementById('tab-'  + id).classList.toggle('on', id === t);
+  });
+}
+
+function renderAll() {
+  renderSummary();
+  renderGantt();
+  renderCoupon();
+  renderDailyList();
+  renderTaskTable();
+}
+
+renderAll();
+</script>
+</body>
+</html>
